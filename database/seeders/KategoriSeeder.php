@@ -16,5 +16,6 @@ class KategoriSeeder extends Seeder
     foreach ($kategoris as $k) {
         Kategori::create(['nama_kategori' => $k]);
     }
+    // test perubahan
 }
 }
