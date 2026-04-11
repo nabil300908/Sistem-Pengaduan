@@ -1,5 +1,8 @@
 [phases.setup]
 nixPkgs = ["php", "php82Packages.composer", "nodejs"]
+cmds = [
+  "chmod -R 777 storage bootstrap/cache"
+]
 
 [phases.build]
 cmds = [
