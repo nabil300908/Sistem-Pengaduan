@@ -9,4 +9,4 @@ cmds = [
 ]
 
 [phases.start]
-cmd = "vendor/bin/heroku-php-apache2 public/"
+cmd = "php artisan migrate --force && php artisan db:seed --class=DatabaseSeeder --force && vendor/bin/heroku-php-apache2 public/"
