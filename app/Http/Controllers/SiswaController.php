@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Laporan;
-use App\Models\Kategori;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -29,7 +28,11 @@ class SiswaController extends Controller
 
     public function create()
     {
-        $kategoris = Kategori::all();
+        $kategoris = [
+            (object)['id' => 1, 'nama_kategori' => 'Fasilitas'],
+            (object)['id' => 2, 'nama_kategori' => 'Kebersihan'],
+            (object)['id' => 3, 'nama_kategori' => 'Keamanan'],
+        ];
         return view('siswa.laporan.create', compact('kategoris'));
     }
 
@@ -37,7 +40,7 @@ class SiswaController extends Controller
     {
         $request->validate([
             'nama_pelapor' => 'required|string|max:100',
-            'kategori_id'  => 'required|exists:kategoris,id',
+            'kategori_id'  => 'required|in:1,2,3',
             'judul'        => 'required|string|max:255',
             'deskripsi'    => 'required|string',
             'lokasi'       => 'required|string|max:255',
@@ -74,7 +77,11 @@ class SiswaController extends Controller
     public function edit($id)
     {
         $laporan   = Laporan::findOrFail($id);
-        $kategoris = Kategori::all();
+        $kategoris = [
+            (object)['id' => 1, 'nama_kategori' => 'Fasilitas'],
+            (object)['id' => 2, 'nama_kategori' => 'Kebersihan'],
+            (object)['id' => 3, 'nama_kategori' => 'Keamanan'],
+        ];
         return view('siswa.laporan.edit', compact('laporan', 'kategoris'));
     }
 
@@ -84,7 +91,7 @@ class SiswaController extends Controller
 
         $request->validate([
             'nama_pelapor' => 'required|string|max:100',
-            'kategori_id'  => 'required|exists:kategoris,id',
+            'kategori_id'  => 'required|in:1,2,3',
             'judul'        => 'required|string|max:255',
             'deskripsi'    => 'required|string',
             'lokasi'       => 'required|string|max:255',
