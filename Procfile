@@ -1,2 +1,1 @@
-web: vendor/bin/heroku-php-apache2 public/
-release: php artisan migrate --force && php artisan db:seed --class=DatabaseSeeder --force
+web: php artisan migrate --force && vendor/bin/heroku-php-apache2 public/
