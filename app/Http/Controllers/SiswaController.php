@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Laporan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Support\Facades\Mail;
 
 class SiswaController extends Controller
 {
@@ -33,6 +33,7 @@ class SiswaController extends Controller
             (object)['id' => 2, 'nama_kategori' => 'Kebersihan'],
             (object)['id' => 3, 'nama_kategori' => 'Keamanan'],
         ];
+
         return view('siswa.laporan.create', compact('kategoris'));
     }
 
@@ -48,6 +49,7 @@ class SiswaController extends Controller
         ]);
 
         $fotoPath = null;
+
         if ($request->hasFile('foto')) {
             $fotoPath = $request->file('foto')->store('laporan', 'public');
         }
@@ -63,6 +65,19 @@ class SiswaController extends Controller
             'status'       => 'menunggu',
         ]);
 
+        Mail::raw(
+            "Ada laporan baru masuk.\n\n" .
+            "Nama Pelapor : " . $request->nama_pelapor . "\n" .
+            "Judul        : " . $request->judul . "\n" .
+            "Lokasi       : " . $request->lokasi . "\n" .
+            "Deskripsi    : " . $request->deskripsi . "\n" .
+            "Status       : Menunggu",
+            function ($msg) {
+                $msg->to('fadlan.nabil848@smk.belajar.id')
+                    ->subject('Notifikasi Laporan Baru');
+            }
+        );
+
         return redirect()->route('publik.index')
             ->with('success', 'Laporan berhasil dikirim! Terima kasih.')
             ->with('new_laporan_id', $laporan->id);
@@ -76,12 +91,14 @@ class SiswaController extends Controller
 
     public function edit($id)
     {
-        $laporan   = Laporan::findOrFail($id);
+        $laporan = Laporan::findOrFail($id);
+
         $kategoris = [
             (object)['id' => 1, 'nama_kategori' => 'Fasilitas'],
             (object)['id' => 2, 'nama_kategori' => 'Kebersihan'],
             (object)['id' => 3, 'nama_kategori' => 'Keamanan'],
         ];
+
         return view('siswa.laporan.edit', compact('laporan', 'kategoris'));
     }
 
@@ -99,10 +116,12 @@ class SiswaController extends Controller
         ]);
 
         $fotoPath = $laporan->foto;
+
         if ($request->hasFile('foto')) {
             if ($laporan->foto) {
                 Storage::disk('public')->delete($laporan->foto);
             }
+
             $fotoPath = $request->file('foto')->store('laporan', 'public');
         }
 
@@ -122,10 +141,13 @@ class SiswaController extends Controller
     public function destroy($id)
     {
         $laporan = Laporan::findOrFail($id);
+
         if ($laporan->foto) {
             Storage::disk('public')->delete($laporan->foto);
         }
+
         $laporan->delete();
+
         return redirect()->route('publik.index')
             ->with('success', 'Laporan berhasil dihapus.');
     }
