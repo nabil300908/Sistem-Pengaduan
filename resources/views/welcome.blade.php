@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -160,6 +161,54 @@
                 </div>
                 <h5 class="fw-bold">Selesai</h5>
                 <p class="text-muted">Setelah diperbaiki, admin mengubah status menjadi Selesai dan bisa dilihat semua orang.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- SARAN --}}
+<section class="py-5 bg-white">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 mb-3">Saran & Masukan</span>
+            <h2 class="fw-bold">Punya Saran untuk Kami?</h2>
+            <p class="text-muted">Sampaikan saran kamu untuk membantu pengembangan sistem ini.</p>
+        </div>
+
+        @if(session('success_saran'))
+        <div class="alert alert-success border-0 rounded-3 shadow-sm d-flex align-items-center gap-2 mb-4 col-lg-6 mx-auto">
+            <i class="bi bi-check-circle-fill text-success fs-5"></i>
+            <span class="fw-semibold">{{ session('success_saran') }}</span>
+        </div>
+        @endif
+
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <form action="{{ route('saran.store') }}" method="POST">
+                            @csrf
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Nama</label>
+                                <input type="text" name="nama"
+                                       class="form-control form-control-lg rounded-3 @error('nama') is-invalid @enderror"
+                                       placeholder="Nama kamu"
+                                       value="{{ old('nama') }}" required>
+                                @error('nama')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Saran</label>
+                                <textarea name="isi_saran" rows="4" maxlength="500"
+                                          class="form-control form-control-lg rounded-3 @error('isi_saran') is-invalid @enderror"
+                                          placeholder="Tulis saran kamu di sini..." required>{{ old('isi_saran') }}</textarea>
+                                @error('isi_saran')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+                            <button type="submit" class="btn btn-primary bg-opacity-75 btn-lg rounded-3 fw-bold w-100">
+                                <i class="bi bi-send-fill me-2"></i>Kirim Saran
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -197,6 +197,14 @@
 
         {{-- SIDEBAR --}}
         <div class="col-md-2 px-0 bg-white border-end min-vh-100 py-3 d-none d-md-block d-print-none">
+            <li class="nav-item mb-1">
+    <a class="nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2
+        {{ request()->routeIs('admin.saran.*') ? 'bg-primary text-white' : 'text-secondary' }}"
+       href="{{ route('admin.saran.index') }}">
+        <i class="bi bi-chat-left-text-fill"></i>
+        <span class="small fw-semibold">Saran & Masukan</span>
+    </a>
+</li>
 
             {{-- User Card --}}
             <div class="mx-3 mb-3 p-3 rounded-3 bg-light text-center">
