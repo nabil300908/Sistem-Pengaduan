@@ -1,11 +1,9 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "buildpacks": [
-      "heroku/php"
-    ]
+    "buildpacks": ["heroku/php"]
   },
   "deploy": {
-    "startCommand": "vendor/bin/heroku-php-apache2 public/ || php artisan serve --host=0.0.0.0 --port=8080"
+    "startCommand": "php artisan config:clear && php artisan cache:clear && php artisan storage:link || true && vendor/bin/heroku-php-apache2 public/"
   }
 }

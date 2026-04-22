@@ -127,7 +127,7 @@
                     <h6 class="fw-bold mb-3">
                         <i class="bi bi-image me-2 text-primary"></i>Foto Laporan
                     </h6>
-                    <img src="{{ Storage::url($laporan->foto) }}"
+                    <img src="{{ asset('storage/' . $laporan->foto) }}"
                          class="img-fluid rounded-3 w-100"
                          alt="Foto Laporan">
                 </div>
