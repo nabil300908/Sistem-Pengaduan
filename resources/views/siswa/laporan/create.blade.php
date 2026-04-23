@@ -37,21 +37,18 @@
                     <form action="{{ route('publik.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
-                        {{-- NAMA --}}
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold small text-uppercase text-muted">Nama Pelapor</label>
-                            <div class="input-group input-group-lg">
-                                <span class="input-group-text border-end-0 bg-white">
-                                    <i class="bi bi-person text-primary"></i>
-                                </span>
-                                <input type="text" name="nama_pelapor"
-                                       class="form-control border-start-0 ps-0 @error('nama_pelapor') is-invalid @enderror"
-                                       placeholder="Nama lengkap kamu"
-                                       value="{{ old('nama_pelapor') }}" required>
-                                @error('nama_pelapor')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                            </div>
-                        </div>
-
+                        {{-- NAMA OTOMATIS --}}
+<div class="mb-4">
+    <label class="form-label fw-semibold small text-uppercase text-muted">Nama Pelapor</label>
+    <div class="input-group input-group-lg">
+        <span class="input-group-text border-end-0 bg-white">
+            <i class="bi bi-person-check text-primary"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 ps-0 bg-light"
+               value="{{ session('user_name') }}" disabled>
+    </div>
+    <div class="form-text">Nama diambil otomatis dari akun kamu.</div>
+</div>
                         {{-- KATEGORI + LOKASI --}}
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">

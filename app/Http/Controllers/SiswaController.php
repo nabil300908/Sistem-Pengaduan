@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Laporan;
+use App\Models\Kategori;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
@@ -11,6 +12,10 @@ class SiswaController extends Controller
 {
     public function index()
     {
+        if (!session('user_id')) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
         $laporans      = Laporan::with('kategori')->latest()->paginate(10);
         $totalSemua    = Laporan::count();
         $totalMenunggu = Laporan::where('status', 'menunggu')->count();
@@ -28,24 +33,44 @@ class SiswaController extends Controller
 
     public function create()
     {
-        $kategoris = [
-            (object)['id' => 1, 'nama_kategori' => 'Fasilitas'],
-            (object)['id' => 2, 'nama_kategori' => 'Kebersihan'],
-            (object)['id' => 3, 'nama_kategori' => 'Keamanan'],
-        ];
+        if (!session('user_id')) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+        }
 
+        $sudahLapor = Laporan::where('user_id', session('user_id'))
+            ->whereDate('created_at', today())
+            ->exists();
+
+        if ($sudahLapor) {
+            return redirect()->route('publik.index')
+                ->with('error', 'Kamu sudah membuat laporan hari ini. Maksimal 1 laporan per hari.');
+        }
+
+        $kategoris = Kategori::all();
         return view('siswa.laporan.create', compact('kategoris'));
     }
 
     public function store(Request $request)
     {
+        if (!session('user_id')) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $sudahLapor = Laporan::where('user_id', session('user_id'))
+            ->whereDate('created_at', today())
+            ->exists();
+
+        if ($sudahLapor) {
+            return redirect()->route('publik.index')
+                ->with('error', 'Kamu sudah membuat laporan hari ini. Maksimal 1 laporan per hari.');
+        }
+
         $request->validate([
-            'nama_pelapor' => 'required|string|max:100',
-            'kategori_id'  => 'required|in:1,2,3',
-            'judul'        => 'required|string|max:255',
-            'deskripsi'    => 'required|string',
-            'lokasi'       => 'required|string|max:255',
-            'foto'         => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'kategori_id' => 'required|exists:kategoris,id',
+            'judul'       => 'required|string|max:255',
+            'deskripsi'   => 'required|string|max:200',
+            'lokasi'      => 'required|string|max:255',
+            'foto'        => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
         ]);
 
         $fotoPath = null;
@@ -55,8 +80,9 @@ class SiswaController extends Controller
         }
 
         $laporan = Laporan::create([
-            'nama_pelapor' => $request->nama_pelapor,
-            'user_id'      => null,
+            'nama_pelapor' => session('user_name'),
+            'email'        => session('user_email'), // <-- INI YANG DITAMBAH
+            'user_id'      => session('user_id'),
             'kategori_id'  => $request->kategori_id,
             'judul'        => $request->judul,
             'deskripsi'    => $request->deskripsi,
@@ -65,18 +91,22 @@ class SiswaController extends Controller
             'status'       => 'menunggu',
         ]);
 
-        Mail::raw(
-            "Ada laporan baru masuk.\n\n" .
-            "Nama Pelapor : " . $request->nama_pelapor . "\n" .
-            "Judul        : " . $request->judul . "\n" .
-            "Lokasi       : " . $request->lokasi . "\n" .
-            "Deskripsi    : " . $request->deskripsi . "\n" .
-            "Status       : Menunggu",
-            function ($msg) {
-                $msg->to('fadlan.nabil848@smk.belajar.id')
-                    ->subject('Notifikasi Laporan Baru');
-            }
-        );
+        try {
+            Mail::raw(
+                "Ada laporan baru masuk.\n\n" .
+                "Nama Pelapor : " . session('user_name') . "\n" .
+                "Email        : " . session('user_email') . "\n" .
+                "Judul        : " . $request->judul . "\n" .
+                "Lokasi       : " . $request->lokasi . "\n" .
+                "Deskripsi    : " . $request->deskripsi . "\n" .
+                "Status       : Menunggu",
+                function ($msg) {
+                    $msg->to('fadlan.nabil848@smk.belajar.id')
+                        ->subject('Notifikasi Laporan Baru');
+                }
+            );
+        } catch (\Exception $e) {
+        }
 
         return redirect()->route('publik.index')
             ->with('success', 'Laporan berhasil dikirim! Terima kasih.')
@@ -85,34 +115,40 @@ class SiswaController extends Controller
 
     public function show($id)
     {
+        if (!session('user_id')) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
         $laporan = Laporan::with('kategori')->findOrFail($id);
         return view('siswa.laporan.show', compact('laporan'));
     }
 
     public function edit($id)
     {
-        $laporan = Laporan::findOrFail($id);
+        if (!session('user_id')) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+        }
 
-        $kategoris = [
-            (object)['id' => 1, 'nama_kategori' => 'Fasilitas'],
-            (object)['id' => 2, 'nama_kategori' => 'Kebersihan'],
-            (object)['id' => 3, 'nama_kategori' => 'Keamanan'],
-        ];
+        $laporan   = Laporan::findOrFail($id);
+        $kategoris = Kategori::all();
 
         return view('siswa.laporan.edit', compact('laporan', 'kategoris'));
     }
 
     public function update(Request $request, $id)
     {
+        if (!session('user_id')) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
         $laporan = Laporan::findOrFail($id);
 
         $request->validate([
-            'nama_pelapor' => 'required|string|max:100',
-            'kategori_id'  => 'required|in:1,2,3',
-            'judul'        => 'required|string|max:255',
-            'deskripsi'    => 'required|string',
-            'lokasi'       => 'required|string|max:255',
-            'foto'         => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'kategori_id' => 'required|exists:kategoris,id',
+            'judul'       => 'required|string|max:255',
+            'deskripsi'   => 'required|string|max:200',
+            'lokasi'      => 'required|string|max:255',
+            'foto'        => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
         ]);
 
         $fotoPath = $laporan->foto;
@@ -126,12 +162,11 @@ class SiswaController extends Controller
         }
 
         $laporan->update([
-            'nama_pelapor' => $request->nama_pelapor,
-            'kategori_id'  => $request->kategori_id,
-            'judul'        => $request->judul,
-            'deskripsi'    => $request->deskripsi,
-            'lokasi'       => $request->lokasi,
-            'foto'         => $fotoPath,
+            'kategori_id' => $request->kategori_id,
+            'judul'       => $request->judul,
+            'deskripsi'   => $request->deskripsi,
+            'lokasi'      => $request->lokasi,
+            'foto'        => $fotoPath,
         ]);
 
         return redirect()->route('publik.show', $id)
@@ -140,6 +175,10 @@ class SiswaController extends Controller
 
     public function destroy($id)
     {
+        if (!session('user_id')) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
         $laporan = Laporan::findOrFail($id);
 
         if ($laporan->foto) {

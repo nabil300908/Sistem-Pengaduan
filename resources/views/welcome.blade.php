@@ -21,10 +21,18 @@
             Sarpras Sekolah
         </a>
         <div class="ms-auto d-flex gap-2">
-            <a href="{{ route('publik.index') }}" class="btn btn-outline-light btn-sm px-4 rounded-3">
-                <i class="bi bi-list-ul me-1"></i>Lihat Laporan
-            </a>
-        </div>
+
+    {{-- TAMBAHAN LOGIN --}}
+    <a href="{{ route('login') }}" class="btn btn-warning btn-sm px-4 rounded-3 fw-semibold">
+        <i class="bi bi-box-arrow-in-right me-1"></i>Login
+    </a>
+
+    {{-- TAMBAHAN REGISTER --}}
+    <a href="{{ route('register') }}" class="btn btn-light btn-sm px-4 rounded-3">
+        Daftar
+    </a>
+
+</div>
     </div>
 </nav>
 
