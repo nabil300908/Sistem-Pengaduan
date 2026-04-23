@@ -28,9 +28,9 @@
     </a>
 
     {{-- TAMBAHAN REGISTER --}}
-    <a href="{{ route('register') }}" class="btn btn-light btn-sm px-4 rounded-3">
-        Daftar
-    </a>
+    <a href="{{ route('register') }}" class="btn btn-light btn-sm px-4 rounded-3 fw-semibold">
+    <i class="bi bi-person-plus-fill me-1"></i>Daftar
+</a>
 
 </div>
     </div>
