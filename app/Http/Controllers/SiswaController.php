@@ -99,7 +99,7 @@ class SiswaController extends Controller
         "Deskripsi    : " . $request->deskripsi . "\n" .
         "Status       : Menunggu",
         function ($msg) {
-            $msg->to(env('ADMIN_EMAIL'))
+            $msg->to(config('mail.admin_email'))
                 ->subject('Notifikasi Laporan Baru');
         }
     );
