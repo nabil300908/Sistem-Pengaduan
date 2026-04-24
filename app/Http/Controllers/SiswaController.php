@@ -7,6 +7,7 @@ use App\Models\Kategori;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class SiswaController extends Controller
 {
@@ -90,21 +91,21 @@ class SiswaController extends Controller
         ]);
 
         try {
-            Mail::raw(
-                "Ada laporan baru masuk.\n\n" .
-                "Nama Pelapor : " . session('user_name') . "\n" .
-                "Judul        : " . $request->judul . "\n" .
-                "Lokasi       : " . $request->lokasi . "\n" .
-                "Deskripsi    : " . $request->deskripsi . "\n" .
-                "Status       : Menunggu",
-                function ($msg) {
-                    $msg->to(env('ADMIN_EMAIL'))
-                        ->subject('Notifikasi Laporan Baru');
-                }
-            );
-        } catch (\Exception $e) {
-            // email gagal, laporan tetap tersimpan
+    Mail::raw(
+        "Ada laporan baru masuk.\n\n" .
+        "Nama Pelapor : " . session('user_name') . "\n" .
+        "Judul        : " . $request->judul . "\n" .
+        "Lokasi       : " . $request->lokasi . "\n" .
+        "Deskripsi    : " . $request->deskripsi . "\n" .
+        "Status       : Menunggu",
+        function ($msg) {
+            $msg->to(env('ADMIN_EMAIL'))
+                ->subject('Notifikasi Laporan Baru');
         }
+    );
+} catch (\Exception $e) {
+    Log::error('Email gagal: ' . $e->getMessage());
+}
 
         return redirect()->route('publik.index')
             ->with('success', 'Laporan berhasil dikirim! Terima kasih.')
