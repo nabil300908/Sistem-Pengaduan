@@ -74,14 +74,12 @@ class SiswaController extends Controller
         ]);
 
         $fotoPath = null;
-
         if ($request->hasFile('foto')) {
             $fotoPath = $request->file('foto')->store('laporan', 'public');
         }
 
         $laporan = Laporan::create([
             'nama_pelapor' => session('user_name'),
-            'email'        => session('user_email'), // <-- INI YANG DITAMBAH
             'user_id'      => session('user_id'),
             'kategori_id'  => $request->kategori_id,
             'judul'        => $request->judul,
@@ -95,17 +93,17 @@ class SiswaController extends Controller
             Mail::raw(
                 "Ada laporan baru masuk.\n\n" .
                 "Nama Pelapor : " . session('user_name') . "\n" .
-                "Email        : " . session('user_email') . "\n" .
                 "Judul        : " . $request->judul . "\n" .
                 "Lokasi       : " . $request->lokasi . "\n" .
                 "Deskripsi    : " . $request->deskripsi . "\n" .
                 "Status       : Menunggu",
                 function ($msg) {
-                    $msg->to('fadlan.nabil848@smk.belajar.id')
+                    $msg->to(env('ADMIN_EMAIL'))
                         ->subject('Notifikasi Laporan Baru');
                 }
             );
         } catch (\Exception $e) {
+            // email gagal, laporan tetap tersimpan
         }
 
         return redirect()->route('publik.index')
@@ -131,7 +129,6 @@ class SiswaController extends Controller
 
         $laporan   = Laporan::findOrFail($id);
         $kategoris = Kategori::all();
-
         return view('siswa.laporan.edit', compact('laporan', 'kategoris'));
     }
 
@@ -152,12 +149,10 @@ class SiswaController extends Controller
         ]);
 
         $fotoPath = $laporan->foto;
-
         if ($request->hasFile('foto')) {
             if ($laporan->foto) {
                 Storage::disk('public')->delete($laporan->foto);
             }
-
             $fotoPath = $request->file('foto')->store('laporan', 'public');
         }
 
@@ -180,11 +175,9 @@ class SiswaController extends Controller
         }
 
         $laporan = Laporan::findOrFail($id);
-
         if ($laporan->foto) {
             Storage::disk('public')->delete($laporan->foto);
         }
-
         $laporan->delete();
 
         return redirect()->route('publik.index')
